@@ -58,6 +58,7 @@ describe("Pfper", () => {
         expect(await pfper.tokenSupply()).to.equal(1);
         expect(await pfper.ownerOf(1)).to.equal(account.address);
         expect(await pfper.tokenURI(1)).to.equal('ipfs://myCID/metadata.json');
+        expect(await pfper.balanceOf(account.address)).to.equal(1);
 
         const provider = waffle.provider;
         expect(await provider.getBalance(pfper.address)).to.equal(100);
