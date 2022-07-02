@@ -48,14 +48,14 @@ describe("Pfper", () => {
         const pfper = await Pfper.deploy(100);
         await pfper.deployed();
 
-        expect(await pfper.tokenSupply()).to.equal(0);
+        expect(await pfper.totalSupply()).to.equal(0);
 
         // mint it
         await pfper.mintPfp('myCID', {
             value: 100,
         }).then(tx => tx.wait());
 
-        expect(await pfper.tokenSupply()).to.equal(1);
+        expect(await pfper.totalSupply()).to.equal(1);
         expect(await pfper.ownerOf(1)).to.equal(account.address);
         const json = {
             name: 'pfper #1',
@@ -74,13 +74,13 @@ describe("Pfper", () => {
         const pfper = await Pfper.deploy(100);
         await pfper.deployed();
 
-        expect(await pfper.tokenSupply()).to.equal(0);
+        expect(await pfper.totalSupply()).to.equal(0);
 
         await expect(pfper.mintPfp('myCID', {
             value: 99,
         })).to.be.revertedWith('mint payment insufficient');
 
-        expect(await pfper.tokenSupply()).to.equal(0);
+        expect(await pfper.totalSupply()).to.equal(0);
 
         const provider = waffle.provider;
         expect(await provider.getBalance(pfper.address)).to.equal(0);
@@ -91,14 +91,14 @@ describe("Pfper", () => {
         const pfper = await Pfper.deploy(100);
         await pfper.deployed();
 
-        expect(await pfper.tokenSupply()).to.equal(0);
+        expect(await pfper.totalSupply()).to.equal(0);
 
         // mint it
         await pfper.mintPfp('myCID', {
             value: 100,
         }).then(tx => tx.wait());
 
-        expect(await pfper.tokenSupply()).to.equal(1);
+        expect(await pfper.totalSupply()).to.equal(1);
 
         const provider = waffle.provider;
         expect(await provider.getBalance(pfper.address)).to.equal(100);
@@ -108,7 +108,7 @@ describe("Pfper", () => {
             value: 100,
         })).to.be.revertedWith('pfp already minted');
 
-        expect(await pfper.tokenSupply()).to.equal(1);
+        expect(await pfper.totalSupply()).to.equal(1);
         expect(await provider.getBalance(pfper.address)).to.equal(100);
     });
 
@@ -119,7 +119,7 @@ describe("Pfper", () => {
         const pfper = await Pfper.deploy(100);
         await pfper.deployed();
 
-        expect(await pfper.tokenSupply()).to.equal(0);
+        expect(await pfper.totalSupply()).to.equal(0);
 
         // mint it
         await pfper.mintPfp('myCID', {
@@ -167,5 +167,38 @@ describe("Pfper", () => {
         const finalBalance = await provider.getBalance(account.address);
         expect(finalBalance).to.equal(startingBalance.sub(gas));
         expect(await provider.getBalance(pfper.address)).to.equal(0);
+    });
+
+    it("Can enumerate ownership", async () => {
+        const provider = waffle.provider;
+        const [account1, account2] = await ethers.getSigners();
+
+        const Pfper = await ethers.getContractFactory("Pfper");
+        const pfper = await Pfper.deploy(100);
+        await pfper.deployed();
+
+        // mint one
+        await pfper.mintPfp('myCID1', {
+            value: 100,
+        }).then(tx => tx.wait());
+
+        // mint from a different account
+        await pfper.connect(account2).mintPfp('myCID3', {
+            value: 100,
+        }).then(tx => tx.wait());
+
+        // mint another
+        await pfper.mintPfp('myCID2', {
+            value: 100,
+        }).then(tx => tx.wait());
+
+        expect(await pfper.totalSupply()).to.equal(3);
+
+        expect(await pfper.balanceOf(account1.address)).to.equal(2);
+        expect(await pfper.tokenOfOwnerByIndex(account1.address, 0)).to.equal(1);
+        expect(await pfper.tokenOfOwnerByIndex(account1.address, 1)).to.equal(3);
+
+        expect(await pfper.balanceOf(account2.address)).to.equal(1);
+        expect(await pfper.tokenOfOwnerByIndex(account2.address, 0)).to.equal(2);
     });
 });

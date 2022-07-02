@@ -4,24 +4,22 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Pfper is ERC721, Ownable {
-    uint256 _cost;
-    uint256 _nextId;
+contract Pfper is ERC721Enumerable, Ownable {
+    using Counters for Counters.Counter;
 
-    mapping(uint256 => string) _tokenCIDs;
-    mapping(string => uint256) _minted;
-    mapping(uint256 => address) _authors;
+    uint256 private _cost;
+    Counters.Counter private _tokenCounter;
+
+    mapping(uint256 => string) private _tokenCIDs;
+    mapping(string => uint256) private _minted;
+    mapping(uint256 => address) private _authors;
 
     constructor(uint256 cost) ERC721("pfper", "PFPER") Ownable() {
         _cost = cost;
-        _nextId = 1;
-    }
-
-    function tokenSupply() public view returns (uint256) {
-        return _nextId - 1;
     }
 
     function getCost() public view returns (uint256) {
@@ -35,8 +33,8 @@ contract Pfper is ERC721, Ownable {
     function mintPfp(string memory cid) public payable {
         require(msg.value >= _cost, 'mint payment insufficient');
         require(_minted[cid] == 0, 'pfp already minted');
-        uint256 tokenId = _nextId;
-        _nextId++;
+        _tokenCounter.increment();
+        uint256 tokenId = _tokenCounter.current();
         _tokenCIDs[tokenId] = cid;
         _minted[cid] = tokenId;
         _authors[tokenId] = msg.sender;
