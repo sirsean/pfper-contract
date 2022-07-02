@@ -1,6 +1,18 @@
-# Basic Sample Hardhat Project
+# pfper-contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+This is an ERC-721 NFT smart contract that tracks ownership of `pfper` pixelart
+images that you draw yourself.
+
+The images themselves are stored in IPFS, and the smart contract stores a reference
+to the CID in IPFS. Clients are responsible for fetching the image data from IPFS.
+
+The token metadata is generated on-chain, only the image data is in IPFS. They
+are intended to be SVG images.
+
+The contract is enumerable, so you'll be able to see all the tokens that an
+address currently owns.
+
+## hardhat development
 
 Try running some of the following tasks:
 
