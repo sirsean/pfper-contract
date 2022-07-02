@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +11,7 @@ contract Pfper is ERC721, Ownable {
     uint256 _cost;
     uint256 _nextId;
 
-    mapping(uint256 => string) _tokenURIs;
+    mapping(uint256 => string) _tokenCIDs;
     mapping(string => uint256) _minted;
     mapping(uint256 => address) _authors;
 
@@ -31,13 +32,13 @@ contract Pfper is ERC721, Ownable {
         _cost = cost;
     }
 
-    function mintPfp(string memory ipfsURI) public payable {
+    function mintPfp(string memory cid) public payable {
         require(msg.value >= _cost, 'mint payment insufficient');
-        require(_minted[ipfsURI] == 0, 'pfp already minted');
+        require(_minted[cid] == 0, 'pfp already minted');
         uint256 tokenId = _nextId;
         _nextId++;
-        _tokenURIs[tokenId] = ipfsURI;
-        _minted[ipfsURI] = tokenId;
+        _tokenCIDs[tokenId] = cid;
+        _minted[cid] = tokenId;
         _authors[tokenId] = msg.sender;
         _safeMint(msg.sender, tokenId);
     }
@@ -47,7 +48,11 @@ contract Pfper is ERC721, Ownable {
     }
 
     function tokenURI(uint256 tokenId) override public view returns (string memory) {
-        return _tokenURIs[tokenId];
+        string memory cid = _tokenCIDs[tokenId];
+        string memory json = string(abi.encodePacked('{"name":"pfper #', Strings.toString(tokenId), '","description":"each pfper is drawn by its author.","image":"ipfs://', cid, '"}'));
+        string memory b64json = Base64.encode(bytes(json));
+        string memory output = string(abi.encodePacked('data:application/json;base64,', b64json));
+        return output;
     }
 
     function withdraw() public onlyOwner {

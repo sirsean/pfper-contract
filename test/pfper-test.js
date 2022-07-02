@@ -51,13 +51,18 @@ describe("Pfper", () => {
         expect(await pfper.tokenSupply()).to.equal(0);
 
         // mint it
-        await pfper.mintPfp('ipfs://myCID/metadata.json', {
+        await pfper.mintPfp('myCID', {
             value: 100,
         }).then(tx => tx.wait());
 
         expect(await pfper.tokenSupply()).to.equal(1);
         expect(await pfper.ownerOf(1)).to.equal(account.address);
-        expect(await pfper.tokenURI(1)).to.equal('ipfs://myCID/metadata.json');
+        const json = {
+            name: 'pfper #1',
+            description: `each pfper is drawn by its author.`,
+            image: `ipfs://myCID`,
+        };
+        expect(await pfper.tokenURI(1)).to.equal(`data:application/json;base64,${Buffer.from(JSON.stringify(json)).toString('base64')}`);
         expect(await pfper.balanceOf(account.address)).to.equal(1);
 
         const provider = waffle.provider;
@@ -71,7 +76,7 @@ describe("Pfper", () => {
 
         expect(await pfper.tokenSupply()).to.equal(0);
 
-        await expect(pfper.mintPfp('ipfs://myCID/metadata.json', {
+        await expect(pfper.mintPfp('myCID', {
             value: 99,
         })).to.be.revertedWith('mint payment insufficient');
 
@@ -89,7 +94,7 @@ describe("Pfper", () => {
         expect(await pfper.tokenSupply()).to.equal(0);
 
         // mint it
-        await pfper.mintPfp('ipfs://myCID/metadata.json', {
+        await pfper.mintPfp('myCID', {
             value: 100,
         }).then(tx => tx.wait());
 
@@ -99,7 +104,7 @@ describe("Pfper", () => {
         expect(await provider.getBalance(pfper.address)).to.equal(100);
 
         // try to mint again
-        await expect(pfper.mintPfp('ipfs://myCID/metadata.json', {
+        await expect(pfper.mintPfp('myCID', {
             value: 100,
         })).to.be.revertedWith('pfp already minted');
 
@@ -117,7 +122,7 @@ describe("Pfper", () => {
         expect(await pfper.tokenSupply()).to.equal(0);
 
         // mint it
-        await pfper.mintPfp('ipfs://myCID/metadata.json', {
+        await pfper.mintPfp('myCID', {
             value: 100,
         }).then(tx => tx.wait());
 
@@ -137,14 +142,14 @@ describe("Pfper", () => {
         let gas = ethers.BigNumber.from(0);
 
         // mint one
-        await pfper.mintPfp('ipfs://myCID1/metadata.json', {
+        await pfper.mintPfp('myCID1', {
             value: 100,
         }).then(tx => tx.wait()).then(receipt => {
             gas = gas.add(receipt.cumulativeGasUsed.mul(receipt.effectiveGasPrice));
         });
 
         // mint another
-        await pfper.mintPfp('ipfs://myCID2/metadata.json', {
+        await pfper.mintPfp('myCID2', {
             value: 100,
         }).then(tx => tx.wait()).then(receipt => {
             gas = gas.add(receipt.cumulativeGasUsed.mul(receipt.effectiveGasPrice));
