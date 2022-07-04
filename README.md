@@ -12,6 +12,23 @@ are intended to be SVG images.
 The contract is enumerable, so you'll be able to see all the tokens that an
 address currently owns.
 
+## localhost deployment
+
+```shell
+npx hardhat --network localhost run scripts/deploy.js
+```
+
+After deployment, the contract address will be printed to the console but
+_also_ written to a file called `deployed` ... you can use this file to
+read the contract more easily, for instance during verification, but let's
+not commit it to the repo.
+
+## arbiscan verification
+
+```shell
+npx hardhat verify --constructor-args scripts/arguments.js $(cat deployed)
+```
+
 ## hardhat development
 
 Try running some of the following tasks:

@@ -2,6 +2,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-etherscan");
 require('hardhat-abi-exporter');
 
 const configPath = path.join(os.homedir(), '.wallet');
@@ -71,5 +72,10 @@ module.exports = {
     abiExporter: {
         runOnCompile: true,
         clear: true,
+    },
+    etherscan: {
+        apiKey: {
+            arbitrumOne: config.arbiscan_key,
+        },
     },
 };

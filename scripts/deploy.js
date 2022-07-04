@@ -5,6 +5,7 @@
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 const fs = require('fs');
+const constructorArgs = require('./arguments.js');
 
 async function main() {
     // Hardhat always runs the compile task when running scripts with its command
@@ -16,7 +17,7 @@ async function main() {
 
     // We get the contract to deploy
     const Pfper = await hre.ethers.getContractFactory("Pfper");
-    const pfper = await Pfper.deploy(hre.ethers.utils.parseEther("0.01"), 200);
+    const pfper = await Pfper.deploy(...constructorArgs);
 
     await pfper.deployed();
 
