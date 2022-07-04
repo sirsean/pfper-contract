@@ -4,21 +4,21 @@ const { ethers, waffle } = require("hardhat");
 describe("Pfper", () => {
     it("Should be able to deploy", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
     });
 
     it("Should be owned by the deployer", async () => {
         const [account] = await ethers.getSigners();
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
         expect(await pfper.owner()).to.equal(account.address);
     });
     
     it("Has the expected name", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
         expect(await pfper.name()).to.equal("pfper");
         expect(await pfper.symbol()).to.equal("PFPER");
@@ -26,14 +26,14 @@ describe("Pfper", () => {
 
     it("Has the expected cost", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
         expect(await pfper.getCost()).to.equal(100);
     });
 
     it("Can update the cost", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
         expect(await pfper.getCost()).to.equal(100);
 
@@ -41,11 +41,28 @@ describe("Pfper", () => {
         expect(await pfper.getCost()).to.equal(150);
     });
 
+    it("Has the expected fee", async () => {
+        const Pfper = await ethers.getContractFactory("Pfper");
+        const pfper = await Pfper.deploy(100, 200);
+        await pfper.deployed();
+        expect(await pfper.getSellerFeeBasisPoints()).to.equal(200);
+    });
+
+    it("Can update the fee", async () => {
+        const Pfper = await ethers.getContractFactory("Pfper");
+        const pfper = await Pfper.deploy(100, 200);
+        await pfper.deployed();
+        expect(await pfper.getSellerFeeBasisPoints()).to.equal(200);
+
+        await pfper.setSellerFeeBasisPoints(150).then(tx => tx.wait());
+        expect(await pfper.getSellerFeeBasisPoints()).to.equal(150);
+    });
+
     it("Can mint a PFP", async () => {
         const [account] = await ethers.getSigners();
 
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         expect(await pfper.totalSupply()).to.equal(0);
@@ -61,8 +78,10 @@ describe("Pfper", () => {
             name: 'pfper #1',
             description: `each pfper is drawn by its author.`,
             image: `ipfs://myCID`,
+            fee_recipient: account.address.toString().toLowerCase(),
+            seller_fee_basis_points: 200,
         };
-        expect(await pfper.tokenURI(1)).to.equal(`data:application/json;base64,${Buffer.from(JSON.stringify(json)).toString('base64')}`);
+        expect(await pfper.tokenURI(1).then(uri => JSON.parse(Buffer.from(uri.replace('data:application/json;base64,', ''), 'base64').toString('ascii')))).to.include(json);
         expect(await pfper.balanceOf(account.address)).to.equal(1);
 
         const provider = waffle.provider;
@@ -71,7 +90,7 @@ describe("Pfper", () => {
 
     it("Cannot mint with insufficient funds", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         expect(await pfper.totalSupply()).to.equal(0);
@@ -88,7 +107,7 @@ describe("Pfper", () => {
 
     it("Cannot mint something that has already been minted", async () => {
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         expect(await pfper.totalSupply()).to.equal(0);
@@ -116,7 +135,7 @@ describe("Pfper", () => {
         const [account] = await ethers.getSigners();
 
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         expect(await pfper.totalSupply()).to.equal(0);
@@ -134,7 +153,7 @@ describe("Pfper", () => {
         const [account] = await ethers.getSigners();
 
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         // starting balance
@@ -174,7 +193,7 @@ describe("Pfper", () => {
         const [account1, account2] = await ethers.getSigners();
 
         const Pfper = await ethers.getContractFactory("Pfper");
-        const pfper = await Pfper.deploy(100);
+        const pfper = await Pfper.deploy(100, 200);
         await pfper.deployed();
 
         // mint one
