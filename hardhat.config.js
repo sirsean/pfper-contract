@@ -37,9 +37,16 @@ task('send', 'Sends ETH to an account')
     .setAction(async ({ to, eth }, hre) => {
         console.log('to:', to, 'eth:', eth);
         const value = hre.ethers.utils.parseEther(eth);
-        console.log(value);
         const [signer] = await hre.ethers.getSigners();
-        await signer.sendTransaction({ to, value }).then(tx => tx.wait()).then(r => console.log('sent', r));
+        await signer.sendTransaction({ to, value }).then(tx => tx.wait()).then(r => console.log('sent', r.transactionHash));
+    });
+
+task('withdraw', 'Withdraw ETH from the contract')
+    .addParam('contract', 'the address of the deployed contract')
+    .setAction(async ({ contract }, hre) => {
+        console.log('withdrawing from', contract);
+        const pfper = await hre.ethers.getContractAt("Pfper", contract);
+        await pfper.withdraw().then(tx => tx.wait()).then(r => console.log('done', r.transactionHash));
     });
 
 // You need to export an object to set up your config
