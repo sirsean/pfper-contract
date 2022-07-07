@@ -26,7 +26,7 @@ not commit it to the repo.
 ## arbiscan verification
 
 ```shell
-npx hardhat verify --constructor-args scripts/arguments.js $(cat deployed)
+npx hardhat --network arbitrum verify --constructor-args scripts/arguments.js $(cat deployed)
 ```
 
 ## hardhat development
