@@ -41,6 +41,25 @@ task('send', 'Sends ETH to an account')
         await signer.sendTransaction({ to, value }).then(tx => tx.wait()).then(r => console.log('sent', r.transactionHash));
     });
 
+task('setCost', 'Set the minting cost')
+    .addParam('contract', 'the address of the deployed contract')
+    .addParam('cost', 'new cost in ETH')
+    .setAction(async ({ contract, cost }, hre) => {
+        console.log('contract', contract, 'cost', cost);
+        const value = hre.ethers.utils.parseEther(cost);
+        const pfper = await hre.ethers.getContractAt('Pfper', contract);
+        await pfper.setCost(value).then(tx => tx.wait()).then(r => console.log('done', r.transactionHash));
+    });
+
+task('setSellerFeeBasisPoints', 'Set the transfer fee')
+    .addParam('contract', 'the address of the deployed contract')
+    .addParam('fee', 'new fee basis points')
+    .setAction(async ({ contract, fee }, hre) => {
+        console.log('contract', contract, 'fee', fee);
+        const pfper = await hre.ethers.getContractAt('Pfper', contract);
+        await pfper.setSellerFeeBasisPoints(fee).then(tx => tx.wait()).then(r => console.log('done', r.transactionHash));
+    });
+
 task('withdraw', 'Withdraw ETH from the contract')
     .addParam('contract', 'the address of the deployed contract')
     .setAction(async ({ contract }, hre) => {
