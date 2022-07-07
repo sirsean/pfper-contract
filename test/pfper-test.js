@@ -78,7 +78,7 @@ describe("Pfper", () => {
             name: 'pfper #1',
             description: `each pfper is drawn by its author.`,
             image: `ipfs://myCID`,
-            fee_recipient: account.address.toString().toLowerCase(),
+            fee_recipient: pfper.address.toString().toLowerCase(),
             seller_fee_basis_points: 200,
         };
         expect(await pfper.tokenURI(1).then(uri => JSON.parse(Buffer.from(uri.replace('data:application/json;base64,', ''), 'base64').toString('ascii')))).to.include(json);
