@@ -57,7 +57,13 @@ contract Pfper is ERC721Enumerable, Ownable {
 
     function tokenURI(uint256 tokenId) override public view returns (string memory) {
         string memory cid = _tokenCIDs[tokenId];
-        string memory json = string(abi.encodePacked('{"name":"pfper #', Strings.toString(tokenId), '","description":"each pfper is drawn by its author.","image":"ipfs://', cid, '","seller_fee_basis_points":', Strings.toString(_sellerFeeBasisPoints), ',"fee_recipient":"',Strings.toHexString(uint256(uint160(address(this))), 20),'"}'));
+        string memory json = string(abi.encodePacked(
+            '{"name":"pfper #', Strings.toString(tokenId), '",',
+            '"description":"each pfper is drawn by its author.",',
+            '"image":"ipfs://', cid, '",',
+            '"seller_fee_basis_points":', Strings.toString(_sellerFeeBasisPoints), ',',
+            '"fee_recipient":"',Strings.toHexString(uint256(uint160(address(this))), 20),'"}'
+        ));
         string memory b64json = Base64.encode(bytes(json));
         string memory output = string(abi.encodePacked('data:application/json;base64,', b64json));
         return output;
